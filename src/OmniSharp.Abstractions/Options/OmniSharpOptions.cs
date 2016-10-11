@@ -8,18 +8,26 @@ namespace OmniSharp.Options
     {
         private IDictionary<string, IConfiguration> _items = new Dictionary<string, IConfiguration>();
 
-        public OmniSharpOptions() : this(new FormattingOptions()) { }
+        public OmniSharpOptions() : this(new FormattingOptions(), new BuildOptions()) { }
 
-        public OmniSharpOptions(FormattingOptions options)
+        public OmniSharpOptions(FormattingOptions options, BuildOptions buildOptions)
         {
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
-            
+
+            if (buildOptions == null)
+            {
+                throw new ArgumentNullException(nameof(buildOptions));
+            }
+
             FormattingOptions = options;
+            BuildOptions = buildOptions;
         }
 
         public FormattingOptions FormattingOptions { get; }
+
+        public BuildOptions BuildOptions { get; }
     }
 }

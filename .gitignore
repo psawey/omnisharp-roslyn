@@ -26,6 +26,8 @@ nuget.exe
 *.ipch
 *.sln.ide
 debugSettings.json
+launchSettings.json
+*.playlist
 buildlog
 /.vs
 *.lock.json

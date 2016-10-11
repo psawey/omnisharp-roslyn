@@ -27,6 +27,13 @@ namespace OmniSharp.Middleware.Endpoint
     {
         public abstract Task<object> Handle(HttpContext context);
 
+        public ResponseWriter WriterType { get; }
+
+        protected EndpointHandler(ResponseWriter writerType)
+        {
+            WriterType = writerType;
+        }
+
         public static EndpointHandler Create<TRequest, TResponse>(IPredicateHandler languagePredicateHandler, CompositionHost host,
             ILogger logger, EndpointDescriptor item,
             IEnumerable<Lazy<IRequestHandler, OmniSharpLanguage>> handlers,
@@ -60,7 +67,9 @@ namespace OmniSharp.Middleware.Endpoint
         private readonly IEnumerable<Plugin> _plugins;
         private readonly Lazy<EndpointHandler<UpdateBufferRequest, object>> _updateBufferHandler;
 
-        public EndpointHandler(IPredicateHandler languagePredicateHandler, CompositionHost host, ILogger logger, EndpointDescriptor item, IEnumerable<Lazy<IRequestHandler, OmniSharpLanguage>> handlers, Lazy<EndpointHandler<UpdateBufferRequest, object>> updateBufferHandler, IEnumerable<Plugin> plugins)
+        public EndpointHandler(IPredicateHandler languagePredicateHandler, CompositionHost host, ILogger logger, EndpointDescriptor item,
+            IEnumerable<Lazy<IRequestHandler, OmniSharpLanguage>> handlers, Lazy<EndpointHandler<UpdateBufferRequest, object>> updateBufferHandler,
+            IEnumerable<Plugin> plugins) : base(item.WriterType)
         {
             EndpointName = item.EndpointName;
             _host = host;

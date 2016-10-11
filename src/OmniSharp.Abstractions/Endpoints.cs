@@ -58,6 +58,8 @@ namespace OmniSharp
         public const string Close = "/close";
         public const string Diagnostics = "/diagnostics";
 
+        public const string BuildCommand = "/buildcommand";
+
         public static class V2
         {
             public const string GetCodeActions = "/v2/getcodeactions";

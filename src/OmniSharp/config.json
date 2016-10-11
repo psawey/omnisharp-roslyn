@@ -10,5 +10,8 @@
         "useTabs": false,
         "tabSize": 4,
         "indentationSize": 4
+    },
+    "buildOptions": {
+        "msBuildPath": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
     }
 }

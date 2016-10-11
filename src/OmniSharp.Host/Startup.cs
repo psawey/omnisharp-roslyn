@@ -102,6 +102,7 @@ namespace OmniSharp
                 .WithProvider(MefValueProvider.From(applicationLifetime))
                 .WithProvider(MefValueProvider.From(options))
                 .WithProvider(MefValueProvider.From(options.FormattingOptions))
+                .WithProvider(MefValueProvider.From(options.BuildOptions))
                 .WithProvider(MefValueProvider.From(loader))
                 .WithProvider(MefValueProvider.From(new MetadataHelper(loader))); // other way to do singleton and autowire?
 

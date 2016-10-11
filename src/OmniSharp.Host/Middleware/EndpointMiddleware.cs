@@ -88,14 +88,33 @@ namespace OmniSharp.Middleware
                     Lazy<EndpointHandler> handler;
                     if (_endpointHandlers.TryGetValue(endpoint, out handler))
                     {
-                        var response = await handler.Value.Handle(httpContext);
-                        MiddlewareHelpers.WriteTo(httpContext.Response, response);
+                        var endpointHandler = handler.Value;
+
+                        var response = await endpointHandler.Handle(httpContext);
+                        WriteToResponse(httpContext.Response, response, endpointHandler.WriterType);
                         return;
                     }
                 }
             }
 
             await _next(httpContext);
+        }
+
+        private void WriteToResponse(HttpResponse response, object value, ResponseWriter writer)
+        {
+            switch (writer)
+            {
+                case ResponseWriter.Text:
+
+                    MiddlewareHelpers.WriteToRaw(response, value);
+                    break;
+
+                case ResponseWriter.Json:
+                default:
+
+                    MiddlewareHelpers.WriteTo(response, value);
+                    break;
+            }
         }
     }
 
