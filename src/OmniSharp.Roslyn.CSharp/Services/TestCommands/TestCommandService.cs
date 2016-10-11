@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Composition;
 using System.Composition.Hosting;
@@ -8,22 +9,73 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Extensions.Logging;
 using OmniSharp.Mef;
 using OmniSharp.Models;
+using OmniSharp.Services;
 
 namespace OmniSharp.Roslyn.CSharp.Services.TestCommands
 {
-    [OmniSharpHandler(OmnisharpEndpoints.TestCommand, LanguageNames.CSharp)]
+	[Export(typeof(ITestCommandProvider))]
+	public class NunitTestCommandProvider : ITestCommandProvider
+	{
+		private ILogger _logger;
+
+		[ImportingConstructor]
+		public NunitTestCommandProvider(ILoggerFactory loggerFactory)
+		{
+			_logger = loggerFactory.CreateLogger<NunitTestCommandProvider>();
+		}
+
+		private const string All = "nunit3-console.exe --noh {{AssemblyPath}}";
+		private const string Fixture = "nunit3-console.exe --noh {{AssemblyPath}} --test={{TypeName}}";
+		private const string Single = "nunit3-console.exe --noh {{AssemblyPath}} --test={{TypeName}}.{{MethodName}}";
+
+		public string GetTestCommand(TestContext testContext)
+		{
+			string testCommand = All;
+
+			switch (testContext.TestCommandType)
+			{
+				case TestCommandType.All:
+					testCommand = All;
+					break;
+				case TestCommandType.Fixture:
+					testCommand = Fixture;
+					break;
+				case TestCommandType.Single:
+					testCommand = Single;
+					break;
+			}
+
+			var typeName = testContext.Symbol.ContainingType.Name;
+			var directory = new FileInfo(testContext.ProjectFile).Directory.FullName;
+			var assembly = testContext.Symbol.ContainingAssembly.Name;
+			var methodName = testContext.Symbol.Name;
+
+			var assemblyName = Path.Combine(directory, "bin", "Debug", assembly + ".dll");
+
+			testCommand = testCommand.Replace("{{AssemblyPath}}", assemblyName)
+				.Replace("{{TypeName}}", typeName)
+				.Replace("{{MethodName}}", methodName);
+
+			_logger.LogInformation("Test Command: '{0}'", testCommand);
+
+			return testCommand;
+		}
+	}
+
+	[OmniSharpHandler(OmnisharpEndpoints.TestCommand, LanguageNames.CSharp)]
     public class TestCommandService : RequestHandler<TestCommandRequest, GetTestCommandResponse>
     {
         private OmnisharpWorkspace _workspace;
-        private IEnumerable<ITestCommandProvider> _testCommandProviders;
+        private readonly List<ITestCommandProvider> _testCommandProviders;
 
         [ImportingConstructor]
         public TestCommandService(OmnisharpWorkspace workspace, [ImportMany] IEnumerable<ITestCommandProvider> testCommandProviders)
         {
             _workspace = workspace;
-            _testCommandProviders = testCommandProviders;
+	        _testCommandProviders = new List<ITestCommandProvider>(testCommandProviders);
         }
 
         public async Task<GetTestCommandResponse> Handle(TestCommandRequest request)
