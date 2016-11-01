@@ -10,5 +10,10 @@
         "useTabs": false,
         "tabSize": 4,
         "indentationSize": 4
+    },
+    "testCommands": {
+        "all": "nunit3-console.exe --noh {{AssemblyPath}}",
+        "fixture": "nunit3-console.exe --noh {{AssemblyPath}} --test={{TypeName}}",
+        "single": "nunit3-console.exe --noh {{AssemblyPath}} --test={{TypeName}}.{{MethodName}}"
     }
 }
