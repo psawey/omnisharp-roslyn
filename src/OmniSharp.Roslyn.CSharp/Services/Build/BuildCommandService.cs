@@ -43,7 +43,7 @@ namespace OmniSharp.Roslyn.CSharp.Services.Build
                 ? "xbuild"
                 : Path.Combine(_buildOptions.MsBuildPath ?? Directory.GetCurrentDirectory(), "msbuild.exe");
 
-            return buildPath;
+            return "\"" + buildPath + "\"";
         }
 
         private string BuildArguments()
